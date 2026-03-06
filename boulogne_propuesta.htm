@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Boulogne · Propuesta Comercial</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:   #0f1923;
+    --paper: #f5f0e8;
+    --gold:  #c8a84b;
+    --rust:  #b84c2e;
+    --sage:  #3d6b4f;
+    --cream: #ede8dc;
+    --muted: #6b6358;
+  }
+
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  html, body {
+    width:100%; height:100%;
+    overflow:hidden;
+    background: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  #deck {
+    position: fixed;
+    inset: 0;
+    background: var(--ink);
+  }
+
+  /* ALL slides absolute stacked — no flex row, no blue gap */
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 52px 32px 72px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .38s ease;
+  }
+  .slide.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* DOTS */
+  #dots {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 7px;
+    z-index: 200;
+  }
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 3px;
+    background: rgba(255,255,255,.2);
+    transition: all .3s;
+    cursor: pointer;
+  }
+  .dot.on { background: var(--gold); width: 20px; }
+
+  /* ARROWS */
+  .arr {
+    position: fixed;
+    top: 50%; transform: translateY(-50%);
+    z-index: 200;
+    background: none; border: none;
+    color: rgba(255,255,255,.22);
+    font-size: 34px;
+    padding: 20px 12px;
+    cursor: pointer;
+    transition: color .2s;
+    user-select: none;
+  }
+  .arr:active { color: var(--gold); }
+  #prev { left: 0; }
+  #next { right: 0; }
+
+  /* SHARED */
+  .label {
+    font-size: 10px; font-weight: 600;
+    letter-spacing: .25em; text-transform: uppercase;
+    color: rgba(255,255,255,.28);
+    margin-bottom: 14px;
+  }
+  .label.dk { color: var(--muted); }
+
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(25px, 6.5vw, 40px);
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 22px;
+  }
+
+  /* ── S1 PORTADA ── */
+  .s1 { background: var(--ink); align-items: center; text-align: center; padding-top:0; padding-bottom:0; }
+  .s1::after {
+    content:''; position:absolute; inset:0;
+    background:
+      radial-gradient(ellipse 80% 55% at 50% 15%, rgba(200,168,75,.13) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 40% at 80% 85%, rgba(61,107,79,.15) 0%, transparent 65%);
+    pointer-events:none;
+  }
+  .s1 .city { font-size:11px; font-weight:600; letter-spacing:.3em; text-transform:uppercase; color:var(--gold); margin-bottom:18px; opacity:.85; }
+  .s1 h1 { font-family:'Playfair Display',serif; font-size:clamp(50px,13vw,82px); font-weight:900; color:var(--paper); line-height:.95; letter-spacing:-.02em; margin-bottom:8px; }
+  .s1 .sub { font-family:'Playfair Display',serif; font-style:italic; font-size:clamp(17px,4vw,24px); color:var(--gold); margin-bottom:30px; }
+  .s1 .hr { width:44px; height:2px; background:var(--gold); opacity:.5; margin:0 auto 26px; }
+  .s1 .intro { font-size:14px; line-height:1.65; color:rgba(245,240,232,.62); max-width:290px; }
+  .s1 .fecha { position:absolute; bottom:64px; left:50%; transform:translateX(-50%); font-size:10px; letter-spacing:.2em; color:rgba(255,255,255,.16); text-transform:uppercase; white-space:nowrap; }
+
+  /* ── S2 PROBLEMA ── */
+  .s2 { background: var(--paper); }
+  .s2 h2 { color: var(--ink); }
+  .s2 h2 em { color: var(--rust); font-style:normal; }
+  .card { width:100%; background:var(--cream); border-radius:12px; padding:16px; margin-bottom:11px; display:flex; gap:13px; align-items:flex-start; border-left:4px solid var(--rust); }
+  .card-ico { font-size:22px; flex-shrink:0; margin-top:2px; }
+  .card-title { font-size:13px; font-weight:600; color:var(--ink); margin-bottom:3px; }
+  .card-body { font-size:11.5px; line-height:1.5; color:var(--muted); }
+  .band { width:100%; border-radius:10px; padding:14px 16px; margin-top:4px; }
+  .band.rust { background:var(--rust); }
+  .band p { font-size:12px; color:rgba(255,255,255,.92); line-height:1.55; font-weight:500; }
+
+  /* ── S3 OPORTUNIDAD ── */
+  .s3 { background: var(--ink); }
+  .s3 h2 { color: var(--paper); }
+  .s3 .lead { font-size:12.5px; color:rgba(245,240,232,.52); line-height:1.6; margin-bottom:20px; }
+  .grid4 { width:100%; display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-bottom:14px; }
+  .opp { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:11px; padding:14px 10px; text-align:center; }
+  .opp .emoji { font-size:24px; margin-bottom:5px; }
+  .opp .txt { font-size:10.5px; color:rgba(245,240,232,.48); line-height:1.4; }
+  .band.sage { background:var(--sage); }
+  .band.sage p { font-size:12px; color:rgba(255,255,255,.88); line-height:1.55; font-style:italic; }
+  .band.sage .attr { font-size:10px; color:rgba(255,255,255,.38); margin-top:5px; font-style:normal; }
+
+  /* ── S4 PROPUESTA 1 ── */
+  .s4 { background: var(--paper); }
+  .s4 h2 { color: var(--ink); }
+  .bignum { position:absolute; top:14px; right:22px; font-family:'Playfair Display',serif; font-size:100px; font-weight:900; color:rgba(200,168,75,.11); line-height:1; user-select:none; pointer-events:none; }
+  .tagline { font-size:12px; color:var(--muted); margin-bottom:20px; font-weight:500; }
+  .feat { display:flex; align-items:flex-start; gap:11px; margin-bottom:13px; }
+  .dot2 { width:7px; height:7px; border-radius:50%; background:var(--gold); flex-shrink:0; margin-top:5px; }
+  .feat p { font-size:12.5px; line-height:1.55; color:var(--ink); }
+  .feat p strong { color:var(--rust); }
+  .box { width:100%; border:1.5px solid var(--gold); border-radius:11px; padding:14px 16px; margin-top:8px; }
+  .box-lbl { font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:var(--gold); font-weight:600; margin-bottom:7px; }
+  .box p { font-size:11.5px; color:var(--muted); line-height:1.6; }
+
+  /* ── S5 PROPUESTA 2 ── */
+  .s5 { background: var(--ink); }
+  .s5 h2 { color: var(--paper); }
+  .s5 .tagline { color:rgba(245,240,232,.38); }
+  .s5 .feat p { color:rgba(245,240,232,.82); }
+  .s5 .feat p strong { color:var(--gold); }
+  .s5 .dot2 { background:var(--sage); }
+  .band-lbl { font-size:9px; letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,.38); font-weight:600; margin-bottom:6px; }
+
+  /* ── S6 CIERRE ── */
+  .s6 { background:var(--ink); align-items:center; text-align:center; }
+  .s6::after { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 90% 55% at 50% 105%, rgba(61,107,79,.22) 0%, transparent 70%),radial-gradient(ellipse 55% 40% at 15% 10%, rgba(200,168,75,.1) 0%, transparent 60%); pointer-events:none; }
+  .qmark { font-family:'Playfair Display',serif; font-size:70px; color:var(--gold); opacity:.25; line-height:.8; margin-bottom:8px; }
+  .s6 blockquote { font-family:'Playfair Display',serif; font-size:clamp(16px,4vw,23px); font-style:italic; color:var(--paper); line-height:1.5; max-width:310px; margin:0 auto 26px; }
+  .s6 blockquote strong { color:var(--gold); font-style:normal; }
+  .s6 .hr { width:38px; height:2px; background:var(--gold); opacity:.42; margin:0 auto 22px; }
+  .cta-list { width:100%; max-width:310px; display:flex; flex-direction:column; gap:9px; }
+  .cta { display:flex; align-items:center; gap:12px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:10px; padding:12px 15px; text-align:left; }
+  .cta-ico { font-size:18px; flex-shrink:0; }
+  .cta-t { font-size:12px; color:rgba(245,240,232,.75); line-height:1.45; }
+  .cta-t strong { color:var(--gold); display:block; font-size:11px; margin-bottom:1px; }
+
+  /* ENTRY ANIMATIONS */
+  .slide.active > * { animation: fu .44s both; }
+  .slide.active > *:nth-child(1) { animation-delay:.05s; }
+  .slide.active > *:nth-child(2) { animation-delay:.13s; }
+  .slide.active > *:nth-child(3) { animation-delay:.21s; }
+  .slide.active > *:nth-child(4) { animation-delay:.28s; }
+  .slide.active > *:nth-child(5) { animation-delay:.34s; }
+  .slide.active > *:nth-child(6) { animation-delay:.4s; }
+  .slide.active > *:nth-child(7) { animation-delay:.46s; }
+  @keyframes fu {
+    from { opacity:0; transform:translateY(14px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+</style>
+</head>
+<body>
+<div id="deck">
+
+  <!-- S1 -->
+  <div class="slide s1 active">
+    <div class="city">San Isidro · Boulogne</div>
+    <h1>Boulogne<br>Comercial</h1>
+    <div class="sub">Una propuesta de vecina</div>
+    <div class="hr"></div>
+    <p class="intro">Cómo convertir el centro de Boulogne en el punto de referencia de los barrios cercanos.</p>
+    <div class="fecha">Propuesta · Marzo 2026</div>
+  </div>
+
+  <!-- S2 -->
+  <div class="slide s2">
+    <div class="label dk">01 · El problema</div>
+    <h2>Boulogne tiene todo.<br>Pero la gente <em>no viene.</em></h2>
+    <div class="card">
+      <div class="card-ico">🚗</div>
+      <div>
+        <div class="card-title">Estacionamiento sin sistema</div>
+        <div class="card-body">No hay parquímetros ni rotación clara. Tránsito no permite parar. La gente elige Martínez o San Isidro antes de perder tiempo buscando lugar.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-ico">⚠️</div>
+      <div>
+        <div class="card-title">Percepción de inseguridad</div>
+        <div class="card-body">No necesariamente es la realidad, pero el imaginario existe. La gente no se anima a dejar el auto 20 minutos y comprar tranquila.</div>
+      </div>
+    </div>
+    <div class="band rust">
+      <p>Vecinos con poder de compra, a metros, que prefieren irse a otro partido antes de venir al centro de su propio barrio.</p>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="slide s3">
+    <div class="label">02 · La oportunidad</div>
+    <h2>Una demanda real,<br>esperando ser captada.</h2>
+    <p class="lead">La Horqueta, Santa Rita y alrededores tienen vecinos que buscan exactamente lo que Boulogne ofrece. El comercio está. La demanda está. Falta el puente.</p>
+    <div class="grid4">
+      <div class="opp"><div class="emoji">🔩</div><div class="txt">Ferreterías y electricidad</div></div>
+      <div class="opp"><div class="emoji">📚</div><div class="txt">Librerías y papelerías</div></div>
+      <div class="opp"><div class="emoji">🥪</div><div class="txt">Gastronomía (sándwiches de Raúl)</div></div>
+      <div class="opp"><div class="emoji">🏘️</div><div class="txt">Barrios con alto poder de compra</div></div>
+    </div>
+    <div class="band sage">
+      <p>"Yo misma, viviendo en La Horqueta, conozco vecinos que vendrían a Boulogne si hubiera lugar para estacionar y se sintieran seguros."</p>
+      <div class="attr">— Vecina y comerciante</div>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="slide s4">
+    <div class="bignum">1</div>
+    <div class="label dk">03 · Propuesta</div>
+    <h2>Sistema de estacionamiento medido</h2>
+    <div class="tagline">Más rotación · Más clientes · Más ventas</div>
+    <div class="feat"><div class="dot2"></div><p>Implementar <strong>parquímetros o fichas</strong> en las calles del centro, similar al modelo de Martínez o San Isidro.</p></div>
+    <div class="feat"><div class="dot2"></div><p><strong>Sistema simple</strong>, no solo app. Muchos vecinos mayores de 60 no quieren usar el celular en la calle. Tarjeta o ficha física.</p></div>
+    <div class="feat"><div class="dot2"></div><p>Rotación de 30–60 minutos genera <strong>más clientes por día</strong>. El comerciante gana.</p></div>
+    <div class="box">
+      <div class="box-lbl">Referencia de modelo</div>
+      <p>Martínez y Av. del Libertador en San Isidro: el sistema medido aumentó la frecuencia de visita y redujo la fricción de entrada al comercio.</p>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="slide s5">
+    <div class="bignum" style="color:rgba(61,107,79,.22)">2</div>
+    <div class="label">04 · Propuesta</div>
+    <h2>Presencia de seguridad visible en la zona comercial</h2>
+    <div class="tagline">No es solo seguridad. Es percepción.</div>
+    <div class="feat"><div class="dot2"></div><p><strong>Agentes o inspectores</strong> en la zona comercial durante el horario de mayor movimiento.</p></div>
+    <div class="feat"><div class="dot2"></div><p>No se trata de que haya delitos. Se trata de que el vecino <strong>sienta que puede dejar el auto</strong> y entrar tranquilo.</p></div>
+    <div class="feat"><div class="dot2"></div><p>Presencia visible genera <strong>confianza → visitas → ventas → actividad.</strong></p></div>
+    <div class="band sage">
+      <div class="band-lbl">El círculo virtuoso</div>
+      <p>Seguridad percibida → vecino viene → gasta → comerciante crece → zona se valoriza → más vecinos vienen.</p>
+    </div>
+  </div>
+
+  <!-- S6 -->
+  <div class="slide s6">
+    <div class="qmark">"</div>
+    <blockquote>Con <strong>estacionamiento</strong> y <strong>seguridad percibida</strong>, Boulogne tiene todo para convertirse en el centro de referencia del corredor norte.</blockquote>
+    <div class="hr"></div>
+    <div class="cta-list">
+      <div class="cta"><div class="cta-ico">🅿️</div><div class="cta-t"><strong>Acción 1</strong>Sistema de estacionamiento medido con fichas y/o app</div></div>
+      <div class="cta"><div class="cta-ico">👮</div><div class="cta-t"><strong>Acción 2</strong>Reforzar presencia visible de seguridad en el centro comercial</div></div>
+      <div class="cta"><div class="cta-ico">📍</div><div class="cta-t"><strong>Próximo paso</strong>Mesa de trabajo con comerciantes y municipio</div></div>
+    </div>
+  </div>
+
+</div>
+
+<div id="dots">
+  <div class="dot on"  onclick="go(0)"></div>
+  <div class="dot"     onclick="go(1)"></div>
+  <div class="dot"     onclick="go(2)"></div>
+  <div class="dot"     onclick="go(3)"></div>
+  <div class="dot"     onclick="go(4)"></div>
+  <div class="dot"     onclick="go(5)"></div>
+</div>
+<button class="arr" id="prev" onclick="move(-1)">‹</button>
+<button class="arr" id="next" onclick="move(1)">›</button>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const dots   = document.querySelectorAll('.dot');
+  let cur = 0, sx = 0;
+
+  function go(n) {
+    slides[cur].classList.remove('active');
+    dots[cur].classList.remove('on');
+    cur = Math.max(0, Math.min(n, slides.length - 1));
+    slides[cur].classList.add('active');
+    dots[cur].classList.add('on');
+  }
+  function move(d) { go(cur + d); }
+
+  document.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, {passive:true});
+  document.addEventListener('touchend',   e => {
+    const dx = e.changedTouches[0].clientX - sx;
+    if (Math.abs(dx) > 45) move(dx < 0 ? 1 : -1);
+  }, {passive:true});
+
+  document.addEventListener('keydown', e => {
+    if (e.key==='ArrowRight'||e.key==='ArrowDown') move(1);
+    if (e.key==='ArrowLeft'||e.key==='ArrowUp')    move(-1);
+  });
+</script>
+</body>
+</html>
